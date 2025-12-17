@@ -1,5 +1,5 @@
 name: wd
-description: "A new Flutter project."
+description: "WebTagArena desktop app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: ">=2.18.0 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -30,6 +30,22 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  webview_flutter: ^4.0.0
+  path_provider: ^2.0.14
+  pdf: ^3.10.0
+  printing: ^5.10.0
+  uuid: ^3.0.7
+  permission_handler: ^11.3.1
+  sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.0
+  open_file: ^3.2.1
+  downloads_path_provider_28: ^0.1.2
+
+
+
+  # use latest version
+  path: ^1.8.3 
    
 
   # The following adds the Cupertino Icons font to your application.
@@ -39,6 +55,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+    
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -60,6 +77,7 @@ flutter:
 
   assets:
     - assets/images/password_field.png
+   
 
 
   # To add assets to your application, add an assets section, like this:
