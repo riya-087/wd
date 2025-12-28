@@ -43,6 +43,7 @@ class _QuizPage1State extends State<QuizPage1> {
   @override
   void initState() {
     super.initState();
+    
     uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
@@ -71,154 +72,242 @@ class _QuizPage1State extends State<QuizPage1> {
     final remaining = QuizTimer().remainingTime;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0B132B), Color(0xFF1C2541)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // Technical circuit background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF0A0F23), Color(0xFF020617)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: cyanPurpleGradient,
-                  ),
-                  child: Text(
-                    remaining > 0 ? formatTime(remaining) : "TIME UP",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C2541),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      width: 2,
-                      color: Colors.cyanAccent.withOpacity(0.7),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          question1.text,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: cyanPurpleGradient,
-                        ),
-                        child: const Icon(
-                          Icons.help_outline,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
+          CustomPaint(
+            size: Size.infinite,
+            painter: _CircuitBackgroundPainter(),
+          ),
+
+          // Diagonal neon highlights
+          Positioned(
+            top: -160,
+            left: -250,
+            child: Transform.rotate(
+              angle: -0.45,
+              child: Container(
+                height: 340,
+                width: 900,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.cyanAccent.withOpacity(0.25),
+                      Colors.transparent,
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: question1.options.length,
-                    itemBuilder: (context, index) {
-                      final selected = _selectedAnswer == index;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: GestureDetector(
-                          onTap: () => _select(index),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            height: 60,
-                            decoration: BoxDecoration(
-                              gradient: selected ? cyanPurpleGradient : null,
-                              color: selected ? null : const Color(0xFF0B132B),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: selected
-                                    ? Colors.cyanAccent
-                                    : Colors.grey.shade700,
-                                width: 2,
-                              ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -200,
+            right: -260,
+            child: Transform.rotate(
+              angle: -0.45,
+              child: Container(
+                height: 380,
+                width: 900,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purpleAccent.withOpacity(0.25),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // CONTENT
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  // Timer
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      gradient: cyanPurpleGradient,
+                    ),
+                    child: Text(
+                      remaining > 0 ? formatTime(remaining) : "TIME UP",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Question card
+                  Container(
+                    padding: const EdgeInsets.all(26),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B132B),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.cyanAccent, width: 2),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            question1.text,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 21,
+                              fontWeight: FontWeight.w700,
                             ),
-                            child: Center(
-                              child: Text(
-                                question1.options[index],
-                                style: TextStyle(
-                                  color: selected ? Colors.white : Colors.white70,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: cyanPurpleGradient,
+                          ),
+                          child: const Icon(Icons.flash_on, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Options
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: question1.options.length,
+                      itemBuilder: (context, index) {
+                        final selected = _selectedAnswer == index;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: GestureDetector(
+                            onTap: () => _select(index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              height: 64,
+                              decoration: BoxDecoration(
+                                gradient: selected ? cyanPurpleGradient : null,
+                                color: selected ? null : const Color(0xFF060B1E),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: selected
+                                      ? Colors.cyanAccent
+                                      : Colors.white24,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  question1.options[index],
+                                  style: TextStyle(
+                                    color: selected
+                                        ? Colors.white
+                                        : Colors.white70,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("PREVIOUS"),
-                    ),
-                    ElevatedButton(
-                    
-                      onPressed: () {
- final Map<String, dynamic> answersSoFar = {
-  'sectionAAnswers': <String, String>{},
-};
 
-if (_selectedAnswer != null) {
-  answersSoFar['sectionAAnswers']['Q1'] =
-      question1.options[_selectedAnswer!];
-}
+                  // Navigation
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("PREVIOUS"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          final Map<String, dynamic> answersSoFar = {
+                            'sectionAAnswers': <String, String>{},
+                          };
 
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => Page2(
-      studentName: widget.studentName,
-      studentEmail: widget.studentEmail,
-      startTime: widget.startTime,
-      answersSoFar: answersSoFar,
-    ),
-  ),
-);
+                          if (_selectedAnswer != null) {
+                            answersSoFar['sectionAAnswers']['Q1'] =
+                                question1.options[_selectedAnswer!];
+                          }
 
-},
-
-                      child: const Text("NEXT"),
-                    ),
-                  ],
-                )
-              ],
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => Page2(
+                                studentName: widget.studentName,
+                                studentEmail: widget.studentEmail,
+                                startTime: widget.startTime,
+                                answersSoFar: answersSoFar,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text("NEXT"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
+}
+
+// Technical circuit pattern painter
+class _CircuitBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.05)
+      ..strokeWidth = 1.2;
+
+    final nodePaint = Paint()
+      ..color = Colors.purpleAccent.withOpacity(0.08)
+      ..style = PaintingStyle.fill;
+
+    const step = 100.0;
+
+    // Vertical and horizontal lines
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+
+    // Nodes
+    for (double x = step / 2; x < size.width; x += step) {
+      for (double y = step / 2; y < size.height; y += step) {
+        canvas.drawCircle(Offset(x, y), 3, nodePaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

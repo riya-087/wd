@@ -1,6 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'timer_service.dart';
-import 'quiz_page5.dart';
+import 'quiz_page6.dart';
+
+class Question {
+  final String text;
+  final List<String> options;
+  Question({required this.text, required this.options});
+}
+
+final Question question4 = Question(
+  text: 'Which attribute is used to uniquely identify an HTML element?',
+  options: ['Class', 'Name', 'id', 'Style'],
+);
 
 class Page4 extends StatefulWidget {
   final String studentName;
@@ -21,6 +33,7 @@ class Page4 extends StatefulWidget {
 }
 
 class _Page4State extends State<Page4> {
+  Timer? uiTimer;
   int? _selectedAnswer;
 
   final Gradient cyanPurpleGradient = const LinearGradient(
@@ -32,225 +45,270 @@ class _Page4State extends State<Page4> {
   @override
   void initState() {
     super.initState();
-    // Restore previously selected answer if exists
-    _selectedAnswer = widget.answersSoFar['Q4Index'];
+
+    // UI Timer for updating display
+    uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
   }
 
-  String _formatTime(int t) {
+  @override
+  void dispose() {
+    uiTimer?.cancel();
+    super.dispose();
+  }
+
+  void _select(int index) {
+    if (QuizTimer().remainingTime <= 0) return;
+    setState(() => _selectedAnswer = index);
+  }
+
+  String formatTime(int t) {
     final m = (t ~/ 60).toString().padLeft(2, '0');
     final s = (t % 60).toString().padLeft(2, '0');
     return "$m:$s";
   }
-
-  void _goNext() {
-    if (_selectedAnswer == null) return;
-
-    // Update answers map
-    final updatedAnswers = Map<String, dynamic>.from(widget.answersSoFar);
-    final sectionAAnswers =
-    Map<String, dynamic>.from(updatedAnswers['sectionAAnswers'] ?? {});
-
-sectionAAnswers['Q4'] = options[_selectedAnswer!];
-
-updatedAnswers['sectionAAnswers'] = sectionAAnswers;
-updatedAnswers['Q4Index'] = _selectedAnswer;
-
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Page5(
-          studentName: widget.studentName,
-          studentEmail: widget.studentEmail,
-          startTime: widget.startTime,
-          answersSoFar: updatedAnswers,
-        ),
-      ),
-    );
-  }
-
-  void _goPrevious() {
-    Navigator.pop(context);
-  }
-
-  final options = [
-    "A. The type=\"password\" hides the text",
-    "B. The disabled attribute blocks input",
-    "C. Because it is a placeholder",
-    "D. Because it needs a name attribute",
-  ];
 
   @override
   Widget build(BuildContext context) {
     final remaining = QuizTimer().remainingTime;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0B132B), Color(0xFF1C2541)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // Technical circuit background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF0A0F23), Color(0xFF020617)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // TIMER
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          CustomPaint(
+            size: Size.infinite,
+            painter: _CircuitBackgroundPainter(),
+          ),
+
+          // Diagonal neon highlights
+          Positioned(
+            top: -160,
+            left: -250,
+            child: Transform.rotate(
+              angle: -0.45,
+              child: Container(
+                height: 340,
+                width: 900,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.cyanAccent.withOpacity(0.25),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -200,
+            right: -260,
+            child: Transform.rotate(
+              angle: -0.45,
+              child: Container(
+                height: 380,
+                width: 900,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purpleAccent.withOpacity(0.25),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // CONTENT
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  // Timer
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(25),
                       gradient: cyanPurpleGradient,
                     ),
                     child: Text(
-                      _formatTime(remaining),
+                      remaining > 0 ? formatTime(remaining) : "TIME UP",
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        letterSpacing: 1.2,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
 
-                // QUESTION CARD
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C2541),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.cyanAccent, width: 2),
-                  ),
-                  child: const Text(
-                    "Question:\nWhy can the user NOT type anything in the password field?",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(height: 30),
+
+                  // Question card
+                  Container(
+                    padding: const EdgeInsets.all(26),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B132B),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.cyanAccent, width: 2),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // OPTIONS
-                ...options.asMap().entries.map((e) {
-                  final index = e.key;
-                  final text = e.value;
-                  final selected = _selectedAnswer == index;
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedAnswer = index),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        height: 55,
-                        decoration: BoxDecoration(
-                          gradient: selected ? cyanPurpleGradient : null,
-                          color: selected ? null : const Color(0xFF0B132B),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: selected ? Colors.cyanAccent : Colors.grey.shade700,
-                            width: 2,
-                          ),
-                        ),
-                        child: Center(
+                    child: Row(
+                      children: [
+                        Expanded(
                           child: Text(
-                            text,
-                            style: TextStyle(
-                              color: selected ? Colors.white : Colors.white70,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                            question4.text,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 21,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                }),
-
-                const Spacer(),
-
-                // PREVIOUS & NEXT BUTTONS
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _goPrevious,
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: cyanPurpleGradient,
                           ),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Colors.grey, Colors.black54],
+                          child: const Icon(Icons.flash_on, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Options
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: question4.options.length,
+                      itemBuilder: (context, index) {
+                        final selected = _selectedAnswer == index;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: GestureDetector(
+                            onTap: () => _select(index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              height: 64,
+                              decoration: BoxDecoration(
+                                gradient: selected ? cyanPurpleGradient : null,
+                                color: selected ? null : const Color(0xFF060B1E),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: selected
+                                      ? Colors.cyanAccent
+                                      : Colors.white24,
+                                  width: 2,
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                "PREVIOUS",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              child: Center(
+                                child: Text(
+                                  question4.options[index],
+                                  style: TextStyle(
+                                    color: selected
+                                        ? Colors.white
+                                        : Colors.white70,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: SizedBox(
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _selectedAnswer == null ? null : _goNext,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: cyanPurpleGradient,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                "NEXT",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                  ),
+
+                  // Navigation
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("PREVIOUS"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          final Map<String, dynamic> answersSoFar =
+                              widget.answersSoFar;
+
+                          if (_selectedAnswer != null) {
+                            answersSoFar['sectionAAnswers']['Q4'] =
+                                question4.options[_selectedAnswer!];
+                          }
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => Page6(
+                                studentName: widget.studentName,
+                                studentEmail: widget.studentEmail,
+                                startTime: widget.startTime,
+                                answersSoFar: answersSoFar,
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
+                        child: const Text("NEXT"),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
+}
+
+// Technical circuit pattern painter (same as QuizPage1)
+class _CircuitBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.05)
+      ..strokeWidth = 1.2;
+
+    final nodePaint = Paint()
+      ..color = Colors.purpleAccent.withOpacity(0.08)
+      ..style = PaintingStyle.fill;
+
+    const step = 100.0;
+
+    // Vertical and horizontal lines
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+
+    // Nodes
+    for (double x = step / 2; x < size.width; x += step) {
+      for (double y = step / 2; y < size.height; y += step) {
+        canvas.drawCircle(Offset(x, y), 3, nodePaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

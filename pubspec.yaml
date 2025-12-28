@@ -76,8 +76,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/password_field.png
-   
+    - assets/images/password_field.png 
+    - assets/images/table.png
+    - assets/images/table1.jpeg
 
 
   # To add assets to your application, add an assets section, like this:

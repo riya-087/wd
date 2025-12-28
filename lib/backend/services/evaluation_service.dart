@@ -3,16 +3,20 @@ class EvaluationService {
     int score = 0;
 
     if (answers['Q1'] == 'GET') score++;
-    if (answers['Q2'] == 'Target= "Blank"') score++;
-    if (answers['Q3'] == 'B. Missing https://') score++;
-    if (answers['Q4'] == 'D. Because it needs a name attribute') score++;
-
+    if (answers['Q2'] == 'C. Required') score++;
+    if (answers['Q3'] == 'A. For') score++;
+    if (answers['Q4'] == 'C. id') score++;
+    if (answers['Q6'] == 'C. iframe') score++;
+    if (answers['Q7'] == 'A. src') score++;
+    if (answers['Q8'] == 'D. <section>') score++;
+    if (answers['Q9'] == 'B. <hr>') score++;
+    if (answers['Q10'] == 'A. action') score++;
     // Q5 (matching)
     final correctMatches = {
-      '<html>': 'HyperText Markup Language',
-      '<head>': 'Metadata Container',
-      '<body>': 'Visible Page Content',
-      '<title>': 'Browser Tab Name',
+  '<a>': 'defines a hyperlink',
+    'href': 'Attribute used in <a> to link',
+    '<option>': 'Drop-down option in list',
+    '<div>': 'Container element for sections',
     };
 
     final userMatches = (answers['Q5Matches'] as Map<String, dynamic>?) ?? {};
