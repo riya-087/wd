@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'timer_service.dart';
-import 'quiz_page4.dart';
+import 'quiz_page8.dart';
 
 class Question {
   final String text;
@@ -9,18 +9,18 @@ class Question {
   Question({required this.text, required this.options});
 }
 
-final Question question3 = Question(
-  text: 'Which attribute is used with <label> to associate it with an input field?',
-  options: ['For', 'Id', 'Name', 'Value'],
+final Question question7 = Question(
+  text: 'Which input type hides the characters entered in the Password field?',
+  options: ['text', 'hidden', 'secure', 'password'],
 );
 
-class Page3 extends StatefulWidget {
+class Page7 extends StatefulWidget {
   final String studentName;
   final String studentEmail;
   final DateTime startTime;
   final Map<String, dynamic> answersSoFar;
 
-  const Page3({
+  const Page7({
     super.key,
     required this.studentName,
     required this.studentEmail,
@@ -29,10 +29,10 @@ class Page3 extends StatefulWidget {
   });
 
   @override
-  State<Page3> createState() => _Page3State();
+  State<Page7> createState() => _Page7State();
 }
 
-class _Page3State extends State<Page3> {
+class _Page7State extends State<Page7> {
   Timer? uiTimer;
   int? _selectedAnswer;
 
@@ -45,8 +45,6 @@ class _Page3State extends State<Page3> {
   @override
   void initState() {
     super.initState();
-
-    // UI Timer for updating display
     uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
@@ -76,7 +74,7 @@ class _Page3State extends State<Page3> {
     return Scaffold(
       body: Stack(
         children: [
-          // Technical circuit background
+          // Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -91,46 +89,6 @@ class _Page3State extends State<Page3> {
             painter: _CircuitBackgroundPainter(),
           ),
 
-          // Diagonal neon highlights
-          Positioned(
-            top: -160,
-            left: -250,
-            child: Transform.rotate(
-              angle: -0.45,
-              child: Container(
-                height: 340,
-                width: 900,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.cyanAccent.withOpacity(0.25),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -200,
-            right: -260,
-            child: Transform.rotate(
-              angle: -0.45,
-              child: Container(
-                height: 380,
-                width: 900,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.purpleAccent.withOpacity(0.25),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
           // CONTENT
           SafeArea(
             child: Padding(
@@ -139,8 +97,8 @@ class _Page3State extends State<Page3> {
                 children: [
                   // Timer
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
                       gradient: cyanPurpleGradient,
@@ -158,7 +116,7 @@ class _Page3State extends State<Page3> {
 
                   const SizedBox(height: 30),
 
-                  // Question card
+                  // QUESTION CARD
                   Container(
                     padding: const EdgeInsets.all(26),
                     decoration: BoxDecoration(
@@ -167,24 +125,46 @@ class _Page3State extends State<Page3> {
                       border: Border.all(color: Colors.cyanAccent, width: 2),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            question3.text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 21,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                question7.text,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // 📸 IMAGE — LEFT ALIGNED, FULLY VISIBLE
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Image.asset(
+                                  'assets/images/password_field.png',
+                                  height: 150,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+
+                        const SizedBox(width: 12),
+
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: cyanPurpleGradient,
                           ),
-                          child: const Icon(Icons.flash_on, color: Colors.white),
+                          child: const Icon(Icons.flash_on,
+                              color: Colors.white),
                         ),
                       ],
                     ),
@@ -192,10 +172,10 @@ class _Page3State extends State<Page3> {
 
                   const SizedBox(height: 30),
 
-                  // Options
+                  // OPTIONS
                   Expanded(
                     child: ListView.builder(
-                      itemCount: question3.options.length,
+                      itemCount: question7.options.length,
                       itemBuilder: (context, index) {
                         final selected = _selectedAnswer == index;
                         return Padding(
@@ -206,8 +186,11 @@ class _Page3State extends State<Page3> {
                               duration: const Duration(milliseconds: 250),
                               height: 64,
                               decoration: BoxDecoration(
-                                gradient: selected ? cyanPurpleGradient : null,
-                                color: selected ? null : const Color(0xFF060B1E),
+                                gradient:
+                                    selected ? cyanPurpleGradient : null,
+                                color: selected
+                                    ? null
+                                    : const Color(0xFF060B1E),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: selected
@@ -218,7 +201,7 @@ class _Page3State extends State<Page3> {
                               ),
                               child: Center(
                                 child: Text(
-                                  question3.options[index],
+                                  question7.options[index],
                                   style: TextStyle(
                                     color: selected
                                         ? Colors.white
@@ -235,7 +218,7 @@ class _Page3State extends State<Page3> {
                     ),
                   ),
 
-                  // Navigation
+                  // NAVIGATION
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -249,14 +232,14 @@ class _Page3State extends State<Page3> {
                               widget.answersSoFar;
 
                           if (_selectedAnswer != null) {
-                            answersSoFar['sectionAAnswers']['Q3'] =
-                                question3.options[_selectedAnswer!];
+                            answersSoFar['sectionAAnswers']['Q7'] =
+                                question7.options[_selectedAnswer!];
                           }
 
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => Page4(
+                              builder: (_) => Page8(
                                 studentName: widget.studentName,
                                 studentEmail: widget.studentEmail,
                                 startTime: widget.startTime,
@@ -279,7 +262,7 @@ class _Page3State extends State<Page3> {
   }
 }
 
-// Technical circuit pattern painter (same as QuizPage1)
+// BACKGROUND PAINTER
 class _CircuitBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -293,7 +276,6 @@ class _CircuitBackgroundPainter extends CustomPainter {
 
     const step = 100.0;
 
-    // Vertical and horizontal lines
     for (double x = 0; x < size.width; x += step) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
     }
@@ -301,7 +283,6 @@ class _CircuitBackgroundPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
     }
 
-    // Nodes
     for (double x = step / 2; x < size.width; x += step) {
       for (double y = step / 2; y < size.height; y += step) {
         canvas.drawCircle(Offset(x, y), 3, nodePaint);

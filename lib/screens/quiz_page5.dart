@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'timer_service.dart';
-import 'section B.dart';
+import 'section B_part1.dart';
 
 class Page5 extends StatefulWidget {
   final String studentName;
@@ -21,6 +22,8 @@ class Page5 extends StatefulWidget {
 }
 
 class _Page5State extends State<Page5> {
+  Timer? uiTimer;
+
   final Gradient cyanPurpleGradient = const LinearGradient(
     colors: [Colors.cyanAccent, Colors.purpleAccent],
     begin: Alignment.topLeft,
@@ -28,10 +31,10 @@ class _Page5State extends State<Page5> {
   );
 
   final Map<String, String> correctPairs = {
-    '<html>': 'HyperText Markup Language',
-    '<head>': 'Metadata Container',
-    '<body>': 'Visible Page Content',
-    '<title>': 'Browser Tab Name',
+    '<a>': 'defines a hyperlink',
+    'href': 'Attribute used in <a> to link',
+    '<option>': 'Drop-down option in list',
+    '<div>': 'Container element for sections',
   };
 
   late List<String> leftTags;
@@ -41,56 +44,51 @@ class _Page5State extends State<Page5> {
   @override
   void initState() {
     super.initState();
+
     leftTags = correctPairs.keys.toList();
     rightAnswers = correctPairs.values.toList()..shuffle();
 
-    // Restore previous matches safely
-    final prevMatches = widget.answersSoFar['Q5Matches'];
-    if (prevMatches != null && prevMatches is Map) {
-      prevMatches.forEach((k, v) {
-        userMatches[k.toString()] = v?.toString();
-      });
-    } else {
-      for (var k in correctPairs.keys) userMatches[k] = null;
+    for (final k in correctPairs.keys) {
+      userMatches[k] = null;
     }
+
+    uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
   }
 
-  int get score {
-    int s = 0;
-    userMatches.forEach((k, v) {
-      if (v != null && correctPairs[k] == v) s++;
-    });
-    return s;
+  @override
+  void dispose() {
+    uiTimer?.cancel();
+    super.dispose();
+  }
+
+  String _formatTime(int t) {
+    final m = (t ~/ 60).toString().padLeft(2, '0');
+    final s = (t % 60).toString().padLeft(2, '0');
+    return "$m:$s";
   }
 
   void _nextToSectionB() {
-    // 1️⃣ Ensure Q5Matches is a proper Map<String, String>
-    final Map<String, String> q5Matches =
-        Map<String, String>.from(widget.answersSoFar['Q5Matches'] ?? {});
+    final Map<String, String> q5Matches = {};
 
-    // 2️⃣ Save current drag & drop matches into Q5Matches
-    userMatches.forEach((key, value) {
-      if (value != null) q5Matches[key] = value;
+    userMatches.forEach((k, v) {
+      if (v != null) q5Matches[k] = v!;
     });
 
-    // 3️⃣ Update Section A answers safely
-    final sectionA = Map<String, dynamic>.from(widget.answersSoFar['sectionAAnswers'] ?? {});
-    sectionA['Q5'] = q5Matches;
+    final sectionA =
+        Map<String, dynamic>.from(widget.answersSoFar['sectionAAnswers'] ?? {});
+    sectionA['Q5Matches'] = q5Matches;
     widget.answersSoFar['sectionAAnswers'] = sectionA;
 
-    // 4️⃣ Update Q5Matches in root map for reference
-    widget.answersSoFar['Q5Matches'] = q5Matches;
-
-    // 5️⃣ Stop current timer and start Section B timer
     QuizTimer().stop();
-    QuizTimer().totalTime = 5 * 60; // 5 minutes for Section B
+    QuizTimer().totalTime = 5 * 60;
     QuizTimer().start();
 
-    // 6️⃣ Navigate to Section B
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => Page6(
+        builder: (_) => sectionBPart1(
           studentName: widget.studentName,
           studentEmail: widget.studentEmail,
           startTime: DateTime.now(),
@@ -100,187 +98,272 @@ class _Page5State extends State<Page5> {
     );
   }
 
-  void _previousPage() => Navigator.pop(context);
-
   @override
   Widget build(BuildContext context) {
     final remaining = QuizTimer().remainingTime;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0B132B), Color(0xFF1C2541)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // BACKGROUND
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF0A0F23), Color(0xFF020617)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Timer
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: cyanPurpleGradient,
-                    ),
-                    child: Text(
-                      _formatTime(remaining),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
+          CustomPaint(
+            size: Size.infinite,
+            painter: _CircuitBackgroundPainter(),
+          ),
 
-                // Question card
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C2541),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.cyanAccent, width: 2),
-                  ),
-                  child: const Text(
-                    "Question:\nMatch the HTML tags with their correct meanings.",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Drag & Drop area
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: leftTags.map((tag) {
-                            final locked = userMatches[tag] != null;
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Draggable<String>(
-                                data: tag,
-                                maxSimultaneousDrags: locked ? 0 : 1,
-                                feedback: _dragBox(tag, active: true),
-                                childWhenDragging: _dragBox(tag, disabled: true),
-                                child: _dragBox(tag, disabled: locked),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          children: rightAnswers.map((answer) {
-                            final used = userMatches.containsValue(answer);
-                            return DragTarget<String>(
-                              onAccept: (tag) {
-                                setState(() {
-                                  userMatches[tag] = answer;
-                                });
-                              },
-                              builder: (_, __, ___) {
-                                return Container(
-                                  margin: const EdgeInsets.symmetric(vertical: 6),
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: used ? cyanPurpleGradient : null,
-                                    color: used ? null : const Color(0xFF0B132B),
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Colors.cyanAccent, width: 2),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      used
-                                          ? userMatches.entries.firstWhere((e) => e.value == answer).key
-                                          : answer,
-                                      style: TextStyle(
-                                        color: used ? Colors.white : Colors.white70,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
+          // NEON HIGHLIGHTS
+          Positioned(
+            top: -160,
+            left: -250,
+            child: Transform.rotate(
+              angle: -0.45,
+              child: Container(
+                height: 340,
+                width: 900,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.cyanAccent.withOpacity(0.25),
+                      Colors.transparent,
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // Previous & Next buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _previousPage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
-                        ),
-                        child: const Text("PREVIOUS"),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _nextToSectionB,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: cyanPurpleGradient.colors.last,
-                        ),
-                        child: const Text("NEXT"),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+          Positioned(
+            bottom: -200,
+            right: -260,
+            child: Transform.rotate(
+              angle: -0.45,
+              child: Container(
+                height: 380,
+                width: 900,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purpleAccent.withOpacity(0.25),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // CONTENT
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  // TIMER
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      gradient: cyanPurpleGradient,
+                    ),
+                    child: Text(
+                      remaining > 0 ? _formatTime(remaining) : "TIME UP",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // QUESTION CARD
+                  Container(
+                    padding: const EdgeInsets.all(26),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B132B),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.cyanAccent, width: 2),
+                    ),
+                    child: const Text(
+                      "Match the HTML tags with their correct meanings",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // DRAG & DROP
+                  Expanded(
+                    child: Row(
+                      children: [
+                        // LEFT
+                        Expanded(
+                          child: Column(
+                            children: leftTags.map((tag) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: Draggable<String>(
+                                  data: tag,
+                                  maxSimultaneousDrags:
+                                      QuizTimer().remainingTime <= 0 ? 0 : 1,
+                                  feedback: Material(
+                                    color: Colors.transparent,
+                                    child: _box(tag, active: true),
+                                  ),
+                                  childWhenDragging:
+                                      _box(tag, disabled: true),
+                                  child: _box(tag),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+
+                        const SizedBox(width: 20),
+
+                        // RIGHT
+                        Expanded(
+                          child: Column(
+                            children: rightAnswers.map((answer) {
+                              return DragTarget<String>(
+                                onAccept: (tag) {
+                                  setState(() {
+                                    userMatches[tag] = answer;
+                                  });
+                                },
+                                builder: (_, __, ___) {
+                                  final used =
+                                      userMatches.containsValue(answer);
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    child: _box(
+                                      used
+                                          ? userMatches.entries
+                                              .firstWhere((e) =>
+                                                  e.value == answer)
+                                              .key
+                                          : answer,
+                                      isTarget: true,
+                                      active: used,
+                                    ),
+                                  );
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // NAVIGATION
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("PREVIOUS"),
+                      ),
+                      ElevatedButton(
+                        onPressed: _nextToSectionB,
+                        child: const Text("NEXT"),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
 
-  Widget _dragBox(String text, {bool disabled = false, bool active = false}) {
-    return Container(
-      height: 50,
+  Widget _box(
+    String text, {
+    bool disabled = false,
+    bool active = false,
+    bool isTarget = false,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      height: 60,
       decoration: BoxDecoration(
         gradient: active ? cyanPurpleGradient : null,
-        color: disabled ? Colors.grey[800] : const Color(0xFF0B132B),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.cyanAccent, width: 2),
+        color: active
+            ? null
+            : disabled
+                ? Colors.grey[900]
+                : const Color(0xFF060B1E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: active
+              ? Colors.cyanAccent
+              : isTarget
+                  ? Colors.cyanAccent.withOpacity(0.6)
+                  : Colors.white24,
+          width: 2,
+        ),
       ),
       child: Center(
         child: Text(
           text,
-          style: TextStyle(
-            color: disabled ? Colors.white38 : Colors.white,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
     );
   }
+}
 
-  String _formatTime(int t) {
-    final m = (t ~/ 60).toString().padLeft(2, '0');
-    final s = (t % 60).toString().padLeft(2, '0');
-    return "$m:$s";
+// CIRCUIT BACKGROUND
+class _CircuitBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.05)
+      ..strokeWidth = 1.2;
+
+    final nodePaint = Paint()
+      ..color = Colors.purpleAccent.withOpacity(0.08);
+
+    const step = 100.0;
+
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+
+    for (double x = step / 2; x < size.width; x += step) {
+      for (double y = step / 2; y < size.height; y += step) {
+        canvas.drawCircle(Offset(x, y), 3, nodePaint);
+      }
+    }
   }
+
+  @override
+  bool shouldRepaint(_) => false;
 }
