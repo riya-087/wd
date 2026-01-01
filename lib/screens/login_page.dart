@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'quiz_page1.dart';
+import 'package:wd/screens/section_a/quiz_page1.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
