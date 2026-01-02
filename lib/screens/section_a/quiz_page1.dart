@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:wd/backend/services/timer_service.dart';
+import 'package:wd/screens/section_b/section%20B_part1.dart';
 import 'quiz_page2.dart';
 
 class Question {
@@ -33,6 +34,7 @@ class QuizPage1 extends StatefulWidget {
 class _QuizPage1State extends State<QuizPage1> {
   Timer? uiTimer;
   int? _selectedAnswer;
+  bool _hasNavigated = false;
 
   final Gradient cyanPurpleGradient = const LinearGradient(
     colors: [Colors.cyanAccent, Colors.purpleAccent],
@@ -44,16 +46,81 @@ class _QuizPage1State extends State<QuizPage1> {
   void initState() {
     super.initState();
     
+    // UI Timer for updating display only
     uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
-    QuizTimer().start();
+    
+    // Start Section A timer with auto-navigation on finish
+    QuizTimer().startSectionA(
+      onTick: () {
+        if (mounted) setState(() {});
+      },
+      onFinish: () {
+        _autoNavigateToSectionB();
+      },
+    );
   }
 
   @override
   void dispose() {
     uiTimer?.cancel();
     super.dispose();
+  }
+
+  void _autoNavigateToSectionB() {
+    if (!mounted || _hasNavigated) return;
+    _hasNavigated = true;
+
+    // Save current answer if any
+    final Map<String, dynamic> answersSoFar = {
+      'sectionAAnswers': <String, String>{},
+    };
+
+    if (_selectedAnswer != null) {
+      answersSoFar['sectionAAnswers']['Q1'] = question1.options[_selectedAnswer!];
+    }
+
+    // Show timeout dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF0B132B),
+        title: const Text(
+          'Section A Time Up!',
+          style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Section A time has expired. Moving to Section B.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              // Navigate to Section B
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => sectionBPart1(
+                    studentName: widget.studentName,
+                    studentEmail: widget.studentEmail,
+                    startTime: widget.startTime,
+                    answersSoFar: answersSoFar,
+                  ),
+                ),
+                (route) => route.isFirst, // Remove all quiz pages
+              );
+            },
+            child: const Text(
+              'Continue to Section B',
+              style: TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _select(int index) {
@@ -141,7 +208,13 @@ class _QuizPage1State extends State<QuizPage1> {
                         const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
-                      gradient: cyanPurpleGradient,
+                      gradient: remaining <= 60
+                          ? const LinearGradient(
+                              colors: [Colors.redAccent, Colors.orangeAccent],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : cyanPurpleGradient,
                     ),
                     child: Text(
                       remaining > 0 ? formatTime(remaining) : "TIME UP",
@@ -242,28 +315,30 @@ class _QuizPage1State extends State<QuizPage1> {
                         child: const Text("PREVIOUS"),
                       ),
                       ElevatedButton(
-                        onPressed: () {
-                          final Map<String, dynamic> answersSoFar = {
-                            'sectionAAnswers': <String, String>{},
-                          };
+                        onPressed: remaining > 0
+                            ? () {
+                                final Map<String, dynamic> answersSoFar = {
+                                  'sectionAAnswers': <String, String>{},
+                                };
 
-                          if (_selectedAnswer != null) {
-                            answersSoFar['sectionAAnswers']['Q1'] =
-                                question1.options[_selectedAnswer!];
-                          }
+                                if (_selectedAnswer != null) {
+                                  answersSoFar['sectionAAnswers']['Q1'] =
+                                      question1.options[_selectedAnswer!];
+                                }
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => Page2(
-                                studentName: widget.studentName,
-                                studentEmail: widget.studentEmail,
-                                startTime: widget.startTime,
-                                answersSoFar: answersSoFar,
-                              ),
-                            ),
-                          );
-                        },
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => Page2(
+                                      studentName: widget.studentName,
+                                      studentEmail: widget.studentEmail,
+                                      startTime: widget.startTime,
+                                      answersSoFar: answersSoFar,
+                                    ),
+                                  ),
+                                );
+                              }
+                            : null,
                         child: const Text("NEXT"),
                       ),
                     ],

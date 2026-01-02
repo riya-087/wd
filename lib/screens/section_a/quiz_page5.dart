@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:wd/backend/services/timer_service.dart';
-import 'package:wd/screens/section_b/section B_part2.dart';
+import 'package:wd/screens/section_b/section%20B_part1.dart';
 
 class Page5 extends StatefulWidget {
   final String studentName;
@@ -81,9 +81,16 @@ class _Page5State extends State<Page5> {
     sectionA['Q5Matches'] = q5Matches;
     widget.answersSoFar['sectionAAnswers'] = sectionA;
 
+    // ✅ CRITICAL FIX: Use startSectionB instead of manually setting totalTime
     QuizTimer().stop();
-    QuizTimer().totalTime = 5 * 60;
-    QuizTimer().start();
+    QuizTimer().startSectionB(
+      onTick: () {
+        if (mounted) setState(() {});
+      },
+      onFinish: () {
+        // This will be handled in Section B
+      },
+    );
 
     Navigator.pushReplacement(
       context,
@@ -91,7 +98,7 @@ class _Page5State extends State<Page5> {
         builder: (_) => sectionBPart1(
           studentName: widget.studentName,
           studentEmail: widget.studentEmail,
-          startTime: DateTime.now(),
+          startTime: widget.startTime,  // Keep original start time
           answersSoFar: widget.answersSoFar,
         ),
       ),
@@ -172,7 +179,13 @@ class _Page5State extends State<Page5> {
                         const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
-                      gradient: cyanPurpleGradient,
+                      gradient: remaining <= 60
+                          ? const LinearGradient(
+                              colors: [Colors.redAccent, Colors.orangeAccent],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : cyanPurpleGradient,
                     ),
                     child: Text(
                       remaining > 0 ? _formatTime(remaining) : "TIME UP",
@@ -283,7 +296,7 @@ class _Page5State extends State<Page5> {
                         child: const Text("PREVIOUS"),
                       ),
                       ElevatedButton(
-                        onPressed: _nextToSectionB,
+                        onPressed: remaining > 0 ? _nextToSectionB : null,
                         child: const Text("NEXT"),
                       ),
                     ],
