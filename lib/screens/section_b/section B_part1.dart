@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:wd/backend/services/timer_service.dart';
-import 'package:wd/screens/section_b/section%20B_part1.dart';
 import 'package:wd/screens/section_b/section%20B_part2.dart';
 
 class sectionBPart1 extends StatefulWidget {
