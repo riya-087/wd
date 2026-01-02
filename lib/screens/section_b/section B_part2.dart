@@ -337,7 +337,13 @@ $sectionBCode
                               child: Text(
                                 '''<!DOCTYPE html>
 <html>
-<head></head>
+<head>
+  <style>
+    body {
+      background-color: yellow;
+    }
+  </style>
+</head>
 <body>
   <h1>Hello</h1>
 </body>

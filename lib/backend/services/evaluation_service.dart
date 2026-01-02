@@ -54,14 +54,14 @@ class EvaluationService {
 </html>''';
 
   /// Evaluates Section A answers
-  /// Returns total score out of 14 (10 MCQs + 4 matching pairs)
+  /// Returns total score out of 10 (9 MCQs @ 1 mark each + Q5 matching @ 1 mark total)
   static int evaluateSectionA(Map<String, dynamic> answersSoFar) {
     int score = 0;
     
     final sectionAAnswers = answersSoFar['sectionAAnswers'] as Map<String, dynamic>?;
     if (sectionAAnswers == null) return 0;
 
-    // Evaluate Q1-Q4, Q6-Q10 (10 questions, 1 mark each)
+    // Evaluate Q1-Q4, Q6-Q10 (9 questions, 1 mark each)
     correctAnswers.forEach((questionKey, correctAnswer) {
       final userAnswer = sectionAAnswers[questionKey] as String?;
       if (userAnswer != null && userAnswer == correctAnswer) {
@@ -69,15 +69,19 @@ class EvaluationService {
       }
     });
 
-    // Evaluate Q5 matching (4 pairs, 1 mark each)
+    // Evaluate Q5 matching (1 mark total - awarded if ALL matches are correct)
     final q5Matches = sectionAAnswers['Q5Matches'] as Map<String, dynamic>?;
     if (q5Matches != null) {
+      bool allCorrect = true;
       correctQ5Matches.forEach((tag, correctMeaning) {
         final userMeaning = q5Matches[tag] as String?;
-        if (userMeaning != null && userMeaning == correctMeaning) {
-          score++;
+        if (userMeaning == null || userMeaning != correctMeaning) {
+          allCorrect = false;
         }
       });
+      if (allCorrect) {
+        score++; // Award 1 mark only if all matches are correct
+      }
     }
 
     return score;
@@ -163,14 +167,14 @@ class EvaluationService {
     if (sectionAAnswers == null) {
       return {
         'totalScore': 0,
-        'maxScore': 14,
+        'maxScore': 10, // Changed from 14 to 10
         'breakdown': {},
       };
     }
 
     Map<String, Map<String, dynamic>> breakdown = {};
 
-    // MCQ questions
+    // MCQ questions (9 questions @ 1 mark each)
     correctAnswers.forEach((questionKey, correctAnswer) {
       final userAnswer = sectionAAnswers[questionKey] as String?;
       final isCorrect = userAnswer == correctAnswer;
@@ -183,15 +187,20 @@ class EvaluationService {
       };
     });
 
-    // Q5 matching
+    // Q5 matching (1 mark total - all or nothing)
     final q5Matches = sectionAAnswers['Q5Matches'] as Map<String, dynamic>?;
     Map<String, dynamic> q5Breakdown = {};
-    int q5Score = 0;
+    bool allCorrect = true;
+    int correctCount = 0;
 
     correctQ5Matches.forEach((tag, correctMeaning) {
       final userMeaning = q5Matches?[tag] as String?;
       final isCorrect = userMeaning == correctMeaning;
-      if (isCorrect) q5Score++;
+      if (isCorrect) {
+        correctCount++;
+      } else {
+        allCorrect = false;
+      }
 
       q5Breakdown[tag] = {
         'userAnswer': userMeaning ?? 'Not Matched',
@@ -200,17 +209,22 @@ class EvaluationService {
       };
     });
 
+    // Award 1 mark only if all 4 matches are correct
+    int q5Score = allCorrect ? 1 : 0;
+
     breakdown['Q5'] = {
       'matches': q5Breakdown,
-      'points': q5Score,
-      'maxPoints': 4,
+      'points': q5Score, // 1 or 0 (not 0-4)
+      'maxPoints': 1, // Changed from 4 to 1
+      'correctMatches': correctCount,
+      'totalMatches': correctQ5Matches.length,
     };
 
     final totalScore = evaluateSectionA(answersSoFar);
 
     return {
       'totalScore': totalScore,
-      'maxScore': 14,
+      'maxScore': 10, // Changed from 14 to 10
       'breakdown': breakdown,
     };
   }
@@ -250,13 +264,15 @@ class EvaluationService {
     final sectionAResults = getDetailedSectionAResults(answersSoFar);
     final sectionBResults = getDetailedSectionBResults(answersSoFar);
     
+    final totalScore = sectionAResults['totalScore'] + sectionBResults['totalScore'];
+    final maxScore = 20; // Fixed to 20 marks total
+    
     return {
       'sectionA': sectionAResults,
       'sectionB': sectionBResults,
-      'totalScore': sectionAResults['totalScore'] + sectionBResults['totalScore'],
-      'maxScore': sectionAResults['maxScore'] + sectionBResults['maxScore'],
-      'percentage': ((sectionAResults['totalScore'] + sectionBResults['totalScore']) / 
-                     (sectionAResults['maxScore'] + sectionBResults['maxScore']) * 100).toStringAsFixed(2),
+      'totalScore': totalScore,
+      'maxScore': maxScore,
+      'percentage': ((totalScore / maxScore) * 100).toStringAsFixed(2),
     };
   }
 }
