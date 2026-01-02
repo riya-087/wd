@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:wd/backend/services/timer_service.dart';
+import 'package:wd/screens/section_b/section%20B_part1.dart';
+import 'package:wd/screens/section_b/section%20B_part2.dart';
 import 'quiz_page6.dart';
 
 class Question {
@@ -35,6 +37,7 @@ class Page4 extends StatefulWidget {
 class _Page4State extends State<Page4> {
   Timer? uiTimer;
   int? _selectedAnswer;
+  bool _hasNavigated = false;
 
   final Gradient cyanPurpleGradient = const LinearGradient(
     colors: [Colors.cyanAccent, Colors.purpleAccent],
@@ -46,16 +49,72 @@ class _Page4State extends State<Page4> {
   void initState() {
     super.initState();
 
-    // UI Timer for updating display
+    // UI Timer for updating display only
     uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
+
+    // Check if already timeout
+    if (QuizTimer().remainingTime <= 0 && !_hasNavigated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _autoNavigateToSectionB();
+      });
+    }
   }
 
   @override
   void dispose() {
     uiTimer?.cancel();
     super.dispose();
+  }
+
+  void _autoNavigateToSectionB() {
+    if (!mounted || _hasNavigated) return;
+    _hasNavigated = true;
+
+    final Map<String, dynamic> answersSoFar = widget.answersSoFar;
+    if (_selectedAnswer != null) {
+      answersSoFar['sectionAAnswers']['Q4'] = question4.options[_selectedAnswer!];
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF0B132B),
+        title: const Text(
+          'Section A Time Up!',
+          style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Section A time has expired. Moving to Section B.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => sectionBPart1(
+                    studentName: widget.studentName,
+                    studentEmail: widget.studentEmail,
+                    startTime: widget.startTime,
+                    answersSoFar: answersSoFar,
+                  ),
+                ),
+                (route) => route.isFirst,
+              );
+            },
+            child: const Text(
+              'Continue to Section B',
+              style: TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _select(int index) {
@@ -72,6 +131,13 @@ class _Page4State extends State<Page4> {
   @override
   Widget build(BuildContext context) {
     final remaining = QuizTimer().remainingTime;
+
+    // Check for timeout during rebuild
+    if (remaining <= 0 && !_hasNavigated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _autoNavigateToSectionB();
+      });
+    }
 
     return Scaffold(
       body: Stack(
@@ -143,7 +209,13 @@ class _Page4State extends State<Page4> {
                         const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
-                      gradient: cyanPurpleGradient,
+                      gradient: remaining <= 60
+                          ? const LinearGradient(
+                              colors: [Colors.redAccent, Colors.orangeAccent],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : cyanPurpleGradient,
                     ),
                     child: Text(
                       remaining > 0 ? formatTime(remaining) : "TIME UP",
@@ -235,7 +307,7 @@ class _Page4State extends State<Page4> {
                     ),
                   ),
 
-                  // Navigation
+                  // Navigation - FIXED: Added timeout check
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -244,27 +316,29 @@ class _Page4State extends State<Page4> {
                         child: const Text("PREVIOUS"),
                       ),
                       ElevatedButton(
-                        onPressed: () {
-                          final Map<String, dynamic> answersSoFar =
-                              widget.answersSoFar;
+                        onPressed: remaining > 0  // ✅ CRITICAL FIX: Added timeout check
+                            ? () {
+                                final Map<String, dynamic> answersSoFar =
+                                    widget.answersSoFar;
 
-                          if (_selectedAnswer != null) {
-                            answersSoFar['sectionAAnswers']['Q4'] =
-                                question4.options[_selectedAnswer!];
-                          }
+                                if (_selectedAnswer != null) {
+                                  answersSoFar['sectionAAnswers']['Q4'] =
+                                      question4.options[_selectedAnswer!];
+                                }
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => Page6(
-                                studentName: widget.studentName,
-                                studentEmail: widget.studentEmail,
-                                startTime: widget.startTime,
-                                answersSoFar: answersSoFar,
-                              ),
-                            ),
-                          );
-                        },
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => Page6(
+                                      studentName: widget.studentName,
+                                      studentEmail: widget.studentEmail,
+                                      startTime: widget.startTime,
+                                      answersSoFar: answersSoFar,
+                                    ),
+                                  ),
+                                );
+                              }
+                            : null,  // ✅ Disable button when time is up
                         child: const Text("NEXT"),
                       ),
                     ],
