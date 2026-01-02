@@ -73,7 +73,7 @@ class _Page5State extends State<Page5> {
     final Map<String, String> q5Matches = {};
 
     userMatches.forEach((k, v) {
-      if (v != null) q5Matches[k] = v!;
+      if (v != null) q5Matches[k] = v;
     });
 
     final sectionA =
