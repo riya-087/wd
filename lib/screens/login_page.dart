@@ -149,24 +149,17 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) => cyanPurpleGradient
-                              .createShader(bounds),
-                          child: const Text(
-                            "WebArena TagMode",
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
+                       Image.asset(
+  'assets/images/WEBDEVICON-2.png', // Path to your logo
+  width: 290, // adjust width as needed
+  height: 130, // adjust height as needed
+  fit: BoxFit.contain,
+),
+                        const SizedBox(height: 5),
                         Text(
                           "Enter your details to begin",
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 17,
                             color: Colors.white.withOpacity(0.6),
                           ),
                         ),

@@ -1,31 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // kIsWeb
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'screens/login_page.dart';
+import 'screens/splash_screen.dart';
+import 'screens/login_page.dart'; // change if needed
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize FFI only on desktop (Windows, Linux, macOS)
-  if (!kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.windows ||
-       defaultTargetPlatform == TargetPlatform.linux ||
-       defaultTargetPlatform == TargetPlatform.macOS)) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  }
-
-  runApp(const MyApp());
+void main() {
+  runApp(const WDApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class WDApp extends StatelessWidget {
+  const WDApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      title: 'WebDevicon',
+      theme: ThemeData.dark(),
+      home: const SplashScreen(),
+      routes: {
+        '/login': (context) => const LoginPage(), // your next screen
+      },
     );
   }
 }

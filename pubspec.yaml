@@ -79,6 +79,8 @@ flutter:
     - assets/images/password_field.png 
     - assets/images/table.png
     - assets/images/table1.jpeg
+    - assets/images/WEBDEVICON.png
+    - assets/images/WEBDEVICON-2.png
 
 
   # To add assets to your application, add an assets section, like this:
