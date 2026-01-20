@@ -11,8 +11,8 @@ class Question {
 }
 
 final Question question9 = Question(
-  text: 'Which tag is used to display a Horizontal line?',
-  options: ['<line>', '<hr>', '<br>', '<border>'],
+  text: 'Which attribute specifies the URL of an image?',
+  options: ['link', 'href', 'src', 'url'],
 );
 
 class Page9 extends StatefulWidget {

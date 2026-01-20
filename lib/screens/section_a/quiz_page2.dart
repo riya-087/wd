@@ -11,8 +11,8 @@ class Question {
 }
 
 final Question question2 = Question(
-  text: 'Which attribute makes a form field Mandatory?',
-  options: ['Validate', 'Important', 'Required', 'Mandatory'],
+  text: 'Which HTML tag is used to create a dropdown list?',
+  options: ['<input>', '<list>', '<select>', '<option>'],
 );
 
 class Page2 extends StatefulWidget {

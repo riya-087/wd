@@ -11,8 +11,8 @@ class Question {
 }
 
 final Question question6 = Question(
-  text: 'Which tag is used to embed a webpage inside another webpage?',
-  options: ['<frame>', '<embed>', 'iframe', '<bject>'],
+  text: 'Which HTML attribute is used to open a link in a new tab?',
+  options: ['href="_blank"', 'new="tab"', 'target="_blank"', 'open="new"'],
 );
 
 class Page6 extends StatefulWidget {

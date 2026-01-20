@@ -11,8 +11,8 @@ class Question {
 }
 
 final Question question8 = Question(
-  text: 'Which HTML5 tag is semantic?',
-  options: ['<div>', '<span>', '<br>', '<section>'],
+  text: 'Which tag is used to define an ordered list?',
+  options: ['<ul>', '<li>', '<ol>', '<dl>'],
 );
 
 class Page8 extends StatefulWidget {
