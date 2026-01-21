@@ -11,8 +11,8 @@ class Question {
 }
 
 final Question question4 = Question(
-  text: 'Which attribute is used to uniquely identify an HTML element?',
-  options: ['Class', 'Name', 'id', 'Style'],
+  text: 'Which HTML tag is used to define a table header cell?',
+  options: ['<td>', '<tr>', '<th>', '<thead>'],
 );
 
 class Page4 extends StatefulWidget {

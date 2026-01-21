@@ -2,14 +2,14 @@ class EvaluationService {
   // Centralized correct answers for Section A
   static const Map<String, String> correctAnswers = {
     'Q1': 'GET',
-    'Q2': 'Required',
-    'Q3': 'For',
-    'Q4': 'id',
-    'Q6': 'iframe',
-    'Q7': 'password',
-    'Q8': '<section>',
-    'Q9': '<hr>',
-    'Q10': 'action',
+    'Q2': '<select>',
+    'Q3': 'required',
+    'Q4': '<th>',
+    'Q6': 'target="_blank"',
+    'Q7': 'style',
+    'Q8': '<ol>',
+    'Q9': 'src',
+    'Q10': 'checkbox',
   };
 
   // Correct matches for Q5 (drag-drop)

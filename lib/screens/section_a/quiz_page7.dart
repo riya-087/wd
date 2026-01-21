@@ -11,8 +11,8 @@ class Question {
 }
 
 final Question question7 = Question(
-  text: 'Which input type hides the characters entered in the Password field?',
-  options: ['text', 'hidden', 'secure', 'password'],
+  text: 'Which attribute is used to specify inline CSS?',
+  options: ['style', 'class', 'css', 'id'],
 );
 
 class Page7 extends StatefulWidget {
@@ -203,18 +203,6 @@ class _Page7State extends State<Page7> {
                                   color: Colors.white,
                                   fontSize: 21,
                                   fontWeight: FontWeight.w700,
-                                ),
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // 📸 IMAGE — LEFT ALIGNED, FULLY VISIBLE
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Image.asset(
-                                  'assets/images/password_field.png',
-                                  height: 150,
-                                  fit: BoxFit.contain,
                                 ),
                               ),
                             ],

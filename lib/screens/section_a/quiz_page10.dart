@@ -11,8 +11,8 @@ class Question {
 }
 
 final Question question10 = Question(
-  text: 'Which attribute specifies where to send form data?',
-  options: ['action', 'method', 'target', 'name'],
+  text: 'Which input type selects multiple options?',
+  options: ['radio', 'checkbox', 'select', 'option'],
 );
 
 class Page10 extends StatefulWidget {
