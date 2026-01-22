@@ -11,7 +11,8 @@ class PdfService {
   static Future<String?> generateFullResult({
     required String name,
     required String email,
-    required DateTime timestamp,
+      required Map<String, Duration> sectionTimes,   // new
+  required Duration totalAllowedTime,            // new
     required Map<String, dynamic> answersSoFar,
   }) async {
     final pdf = pw.Document();
@@ -45,7 +46,15 @@ class PdfService {
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         build: (_) => [
-          _buildHeader(name, email, timestamp, totalScore, maxScore),
+          _buildHeader(
+  name,
+  email,
+  sectionTimes,
+  totalAllowedTime,
+  totalScore,
+  maxScore,
+),
+
           pw.SizedBox(height: 20),
           _buildSectionA(sectionAScore, sectionAMax, breakdown),
           pw.SizedBox(height: 20),
@@ -59,8 +68,21 @@ class PdfService {
 
   // ================= HEADER =================
 
-  static pw.Widget _buildHeader(String name, String email, DateTime timestamp, int totalScore, int maxScore) {
+  static pw.Widget _buildHeader(
+  String name,
+  String email,
+  Map<String, Duration> sectionTimes,
+  Duration totalAllowedTime,
+  int totalScore,
+  int maxScore
+)
+{
     final double percentage = (totalScore / maxScore) * 100;
+    final Duration totalTaken = sectionTimes.values.fold(
+  Duration.zero,
+  (sum, item) => sum + item,
+);
+
     return pw.Container(
       padding: const pw.EdgeInsets.all(20),
       decoration: pw.BoxDecoration(
@@ -75,7 +97,15 @@ class PdfService {
           pw.SizedBox(height: 10),
           pw.Text('Student: $name', style: const pw.TextStyle(fontSize: 12)),
           pw.Text('Email: $email', style: const pw.TextStyle(fontSize: 12)),
-          pw.Text('Date: ${_formatDateTime(timestamp)}', style: const pw.TextStyle(fontSize: 12)),
+          // Calculate total time taken
+pw.Text(
+  'Time Taken: '
+  '${totalTaken.inMinutes} min ${totalTaken.inSeconds % 60} sec '
+  '/ ${totalAllowedTime.inMinutes} min',
+  style: const pw.TextStyle(fontSize: 12),
+),
+
+
           pw.SizedBox(height: 10),
           pw.Text(
             'Total Score: $totalScore / $maxScore (${percentage.toStringAsFixed(1)}%)',
@@ -331,6 +361,7 @@ class PdfService {
     return path;
   }
 
-  static String _formatDateTime(DateTime dt) =>
-      '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+ static String _formatDateTime(DateTime dt) =>
+    '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+
 }

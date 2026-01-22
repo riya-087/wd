@@ -81,15 +81,12 @@ class _Page5State extends State<Page5> {
     sectionA['Q5Matches'] = q5Matches;
     widget.answersSoFar['sectionAAnswers'] = sectionA;
 
-    // ✅ CRITICAL FIX: Use startSectionB instead of manually setting totalTime
     QuizTimer().stop();
     QuizTimer().startSectionB(
       onTick: () {
         if (mounted) setState(() {});
       },
-      onFinish: () {
-        // This will be handled in Section B
-      },
+      onFinish: () {},
     );
 
     Navigator.pushReplacement(
@@ -98,7 +95,7 @@ class _Page5State extends State<Page5> {
         builder: (_) => sectionBPart1(
           studentName: widget.studentName,
           studentEmail: widget.studentEmail,
-          startTime: widget.startTime,  // Keep original start time
+          startTime: widget.startTime,
           answersSoFar: widget.answersSoFar,
         ),
       ),
@@ -127,47 +124,6 @@ class _Page5State extends State<Page5> {
             painter: _CircuitBackgroundPainter(),
           ),
 
-          // NEON HIGHLIGHTS
-          Positioned(
-            top: -160,
-            left: -250,
-            child: Transform.rotate(
-              angle: -0.45,
-              child: Container(
-                height: 340,
-                width: 900,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.cyanAccent.withOpacity(0.25),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -200,
-            right: -260,
-            child: Transform.rotate(
-              angle: -0.45,
-              child: Container(
-                height: 380,
-                width: 900,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.purpleAccent.withOpacity(0.25),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // CONTENT
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -175,15 +131,13 @@ class _Page5State extends State<Page5> {
                 children: [
                   // TIMER
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
                       gradient: remaining <= 60
                           ? const LinearGradient(
                               colors: [Colors.redAccent, Colors.orangeAccent],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
                             )
                           : cyanPurpleGradient,
                     ),
@@ -193,14 +147,13 @@ class _Page5State extends State<Page5> {
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        letterSpacing: 1.2,
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 30),
 
-                  // QUESTION CARD
+                  // QUESTION
                   Container(
                     padding: const EdgeInsets.all(26),
                     decoration: BoxDecoration(
@@ -219,30 +172,51 @@ class _Page5State extends State<Page5> {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 12),
 
-                  // DRAG & DROP
+                  // 🔹 INSTRUCTION LABEL
+                  const Text(
+                    "👉 Drag each tag from the left and drop it onto its correct meaning.\n"
+                    "Matched tags will change color and cannot be reused.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // DRAG & DROP AREA
                   Expanded(
                     child: Row(
                       children: [
-                        // LEFT
+                        // LEFT TAGS
                         Expanded(
                           child: Column(
                             children: leftTags.map((tag) {
+                              final bool isMatched =
+                                  userMatches[tag] != null;
+
                               return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 10),
                                 child: Draggable<String>(
                                   data: tag,
                                   maxSimultaneousDrags:
-                                      QuizTimer().remainingTime <= 0 ? 0 : 1,
+                                      (remaining <= 0 || isMatched) ? 0 : 1,
                                   feedback: Material(
                                     color: Colors.transparent,
                                     child: _box(tag, active: true),
                                   ),
                                   childWhenDragging:
                                       _box(tag, disabled: true),
-                                  child: _box(tag),
+                                  child: _box(
+                                    tag,
+                                    active: isMatched,
+                                    disabled: isMatched,
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -251,7 +225,7 @@ class _Page5State extends State<Page5> {
 
                         const SizedBox(width: 20),
 
-                        // RIGHT
+                        // RIGHT TARGETS
                         Expanded(
                           child: Column(
                             children: rightAnswers.map((answer) {
@@ -264,14 +238,15 @@ class _Page5State extends State<Page5> {
                                 builder: (_, __, ___) {
                                   final used =
                                       userMatches.containsValue(answer);
+
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 10),
                                     child: _box(
                                       used
                                           ? userMatches.entries
-                                              .firstWhere((e) =>
-                                                  e.value == answer)
+                                              .firstWhere(
+                                                  (e) => e.value == answer)
                                               .key
                                           : answer,
                                       isTarget: true,
@@ -340,8 +315,8 @@ class _Page5State extends State<Page5> {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: disabled ? Colors.white54 : Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -350,7 +325,7 @@ class _Page5State extends State<Page5> {
   }
 }
 
-// CIRCUIT BACKGROUND
+// BACKGROUND
 class _CircuitBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

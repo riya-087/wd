@@ -121,14 +121,20 @@ $sectionBCode
       sectionBScore: sectionBTotalMarks,
       sectionBAnswer: combinedSectionBAnswer,
     );
+final Duration totalTimeTaken =
+    DateTime.now().difference(widget.startTime);
 
     // ✅ Generate PDF with complete results
-    await PdfService.generateFullResult(
-      name: widget.studentName,
-      email: widget.studentEmail,
-      timestamp: DateTime.now(),
-      answersSoFar: widget.answersSoFar,
-    );
+   await PdfService.generateFullResult(
+  name: widget.studentName,
+  email: widget.studentEmail,
+  answersSoFar: widget.answersSoFar,
+   sectionTimes: {
+    'total': totalTimeTaken, // ✅ REAL time spent
+  },
+  totalAllowedTime: const Duration(minutes: 20),
+);
+
 
     if (!mounted) return;
 
@@ -315,7 +321,7 @@ $sectionBCode
                       border: Border.all(color: Colors.cyanAccent, width: 2),
                     ),
                     child: const Text(
-                      "TASK:\nUse INLINE CSS to set the background color of the page to LIGHT BLUE.",
+                      "TASK:\nView the given HTML code & modify it by using inline CSS to set the background color to light blue.",
                       style: TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
                     ),
